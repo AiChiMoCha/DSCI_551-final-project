@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apartment Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+            margin: 0;
+        }
+        .apartment-detail, .comments, .comment {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        h1, h3 {
+            color: #0D3B66;
+            font-weight: normal;
+        }
+
+        .star-rating .fa-star {
+            color: #ddd;
+            cursor: pointer;
+        }
+
+        .star-rating .fa-star.checked {
+            color: #FFD700;
+        }
+
+        .button {
+            background-color: #f4d35e;
+            color: od3b66;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="number"], textarea {
+            width: 90.7%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        input[type="submit"] {
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="apartment-detail">
+        <h1><strong>{{ apartment.Name }}</strong></h1>
+        <p><strong>Rating:</strong> {{ apartment.Rating }}</p >
+        <p><strong>Price:</strong> {{ apartment.Price }}</p >
+        <p><strong>Tags:</strong> {{ ', '.join(apartment.Tags) }}</p >
+        <p><strong>Address:</strong> {{ apartment.Address }}</p >
+
+        <h3>Rate this Apartment</h3>
+        <form id="rateApartmentForm">
+            <input type="hidden" name="apartment_name" value="{{ apartment.Name }}">
+            <input type="number" name="score" min="1" max="5" required>
+            <button type="submit">Submit Rating</button>
+        </form>
+    </div>
+
+    <h3>Add a Comment</h3>
+    <form id="addCommentForm">
+        <input type="hidden" name="apartment_name" value="{{ apartment.Name }}">
+        <textarea name="comment" required placeholder="Write your comment here..."></textarea>
+        <button type="submit">Submit Comment</button>
+    </form>
+
+    <div class="comments">
+        <h3>Comments</h3>
+        {% for comment in apartment.comments %}
+        <div class="comment" style="position: relative;">
+            <p>{{ comment.text }}</p >
+            <p>Likes: {{ comment.likes }} - Dislikes: {{ comment.dislikes }}</p >
+            <button onclick="likeComment('{{ comment.comment_id }}')">Like</button>
+            <button onclick="dislikeComment('{{ comment.comment_id }}')">Dislike</button>
+            {% if comment.user_id == current_user.id %}
+                <button style="position: absolute; right: 10px; top: 10px;" onclick="deleteComment('{{ comment.comment_id }}')">Delete</button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        $('#addCommentForm').submit(function(event) {
+            event.preventDefault();
+            var formData = {
+                apartment_name: $('input[name="apartment_name"]', this).val(),
+                text: $('textarea[name="comment"]', this).val()
+            };
+            $.ajax({
+                url: '/comment',
+                type: 'POST',
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                success: function(response) {
+                    alert('Comment added successfully');
+                    location.reload();  // Reload to show new comments
+                },
+                error: function() {
+                    alert('Error adding comment');
+                }
+            });
+        });
+
+        $('#rateApartmentForm').submit(function(event) {
+            event.preventDefault();
+            var formData = {
+                apartment_name: $('input[name="apartment_name"]', this).val(),
+                score: parseInt($('input[name="score"]', this).val(), 10)
+            };
+            $.ajax({
+                url: '/rating',
+                type: 'POST',
+                data: JSON.stringify(formData),
+                contentType: 'application/json; charset=utf-8',
+                success: function(response) {
+                    alert('Rating submitted successfully');
+                    location.reload();  // Reload to update rating info
+                },
+                error: function() {
+                    alert('Error submitting rating');
+                }
+            });
+        });
+
+        function deleteComment(commentId) {
+            if (confirm('Are you sure you want to delete this comment?')) {
+                $.ajax({
+                    url: '/comment/delete/' + commentId,
+                    type: 'POST',
+                    success: function(response) {
+                        alert('Comment deleted successfully');
+                        location.reload();  // Reload to update the comments list
+                    },
+                    error: function(xhr) {
+                        alert('Error deleting comment: ' + xhr.responseText);
+                    }
+                });
+            }
+        }
+
+        function likeComment(commentId) {
+            $.ajax({
+                url: '/comment/like',
+                type: 'POST',
+                data: JSON.stringify({ comment_id: commentId }),
+                contentType: 'application/json; charset=utf-8',
+                success: function(response) {
+                    alert('Comment liked successfully');
+                    location.reload();  // Reload to update likes
+                },
+                error: function() {
+                    alert('Error liking comment');
+                }
+            });
+        }
+
+        function dislikeComment(commentId) {
+            $.ajax({
+                url: '/comment/dislike',
+                type: 'POST',
+                data: JSON.stringify({ comment_id: commentId }),
+                contentType: 'application/json; charset=utf-8',
+                success: function(response) {
+                    alert('Comment disliked successfully');
+                    location.reload();  // Reload to update dislikes
+                },
+                error: function() {
+                    alert('Error disliking comment');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

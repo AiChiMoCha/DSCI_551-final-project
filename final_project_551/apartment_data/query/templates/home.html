@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            background-image: url("{{ url_for('static', filename='back_pic.jpg') }}");
+            background-size: cover; /* 覆盖整个背景区域 */
+            background-position: center; /* 背景图片居中显示 */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .content-wrapper {
+            background-color: rgba(255, 255, 255, 0.80); /* 背景颜色为白色，不透明度为0.80 */
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: auto;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        a {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            margin: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1>Welcome to Living Nearby SC</h1>
+        <div class="button-container">
+            <a href="{{url_for('login')}}">Sign in</a>
+            <a href="{{url_for('register')}}">Sign up</a>
+        </div>
+    </div>
+</body>
+</html>

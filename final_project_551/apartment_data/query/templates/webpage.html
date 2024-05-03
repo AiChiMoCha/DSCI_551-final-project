@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apartment Rating System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #0D3B66;
+        }
+        .clearfix:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e7e7e7;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            height: 80px;
+        }
+        .header h1 {
+            float: left;
+            margin-left: 70px;
+            color: #0D3B66;
+        }
+        .header #searchBox {
+            float: right;
+            margin-right: 20px;
+        }
+        #searchInput {
+            padding: 10px;
+            font-size: 16px;
+            border: 3px solid #0D3B66;
+            margin-right: 10px;
+            width: 300px;
+        }
+        #searchButton {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #0D3B66;
+            color: white;
+            border: none;
+        }
+        .main-content {
+            padding-top: 100px;
+        }
+        #map {
+            width: 61.8%;
+            height: 120vh;
+            float: left;
+            background: #0D3B66;
+            padding-top: 30px;
+            padding-left: 5px;
+        }
+        .apartment-container {
+            width: 37.0%;
+            height: 90vh;
+            float: right;
+            overflow-y: auto;
+            background: #0D3B66;
+            padding: 5px;
+            padding-right: 5px;
+        }
+        .apartment {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .apartment h3 {
+            color: #0D3B66;
+            cursor: pointer;
+            margin: 0 0 5px 0;
+            text-decoration: underline;
+        }
+        .apartment p {
+            margin: 5px 0;
+        }
+        .filters {
+            position: absolute;
+            right: 550px;
+            top: 15px;
+            text-align: center;
+        }
+        .filter {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 10px;
+            background: #0D3B66;
+            color: white;
+            cursor: pointer;
+        }
+        .filter span {
+            display: inline-block;
+            width: 10px;
+        }
+        .filter .asc:after {
+            content: "↑";
+        }
+        .filter .desc:after {
+            content: "↓";
+        }
+    </style>
+</head>
+<body>
+    <div class="header clearfix">
+        <h1>Nearby SC</h1>
+        <div id="searchBox">
+            <input type="text" id="searchInput" placeholder="Search by name or address...">
+            <button id="searchButton">Search</button>
+        </div>
+        <div class="filters">
+            <div class="filter" id="sortRating" onclick="toggleSortOrder('rating')">Rating <span id="ratingOrder" class="desc"></span></div>
+            <div class="filter" id="sortPrice" onclick="toggleSortOrder('price')">Price <span id="priceOrder"></span></div>
+            <div class="filter" id="sortDistance" onclick="toggleSortOrder('distance')">Distance <span id="distanceOrder"></span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="map">
+            <!-- Map goes here -->
+        </div>
+        <div id="apartmentsContainer" class="apartment-container">
+            <!-- Apartment list goes here -->
+        </div>
+    </div>
+
+    <script>
+        let sortStates = {
+            rating: 'desc', // Default sort descending
+            price: 'desc',
+            distance: 'desc'
+        };
+
+        function toggleSortOrder(property) {
+            let currentState = sortStates[property];
+            let newState = currentState === 'desc' ? 'asc' : 'desc';
+            sortStates[property] = newState;
+            loadApartments({ sort_by: property, order: newState });
+            updateSortIndicators(property, newState);
+        }
+
+        function updateSortIndicators(property, order) {
+            // Clear all indicators
+            $('#ratingOrder, #priceOrder, #distanceOrder').removeClass('asc desc');
+            // Set the new indicator
+            $(`#${property}Order`).addClass(order);
+        }
+
+        function loadApartments(query) {
+            $.get("/apartments", query, function(data) {
+                var apartmentsContainer = $("#apartmentsContainer");
+                var mapContainer = $("#map");
+                apartmentsContainer.empty();
+                mapContainer.empty(); // Clear any existing map content
+
+                if (data.map_html) {
+                    mapContainer.html(data.map_html);
+                }
+
+                if (data.apartments && Array.isArray(data.apartments)) {
+                    data.apartments.forEach(function(apartment) {
+                        var apartmentElement = `
+                            <div class="apartment">
+                                <h3 onclick="goToApartmentDetail('${encodeURIComponent(apartment._id)}')">${apartment.Name} - Rating: ${apartment.Rating}</h3>
+                                <p>Price: ${apartment.Price}</p>
+                                <p>Top Comment: ${apartment.top_comment}</p>
+                                <p>Tags: ${apartment.Tags.join(', ')}</p>
+                                <p>Address: ${apartment.Address}</p>
+                            </div>`;
+                        apartmentsContainer.append(apartmentElement);
+                    });
+                } else {
+                    apartmentsContainer.append("<p>No apartments found.</p>");
+                }
+            }).fail(function() {
+                apartmentsContainer.append("<p>Error loading apartments. Please try again later.</p>");
+                mapContainer.append("<p>Error loading map. Please try again later.</p>");
+            });
+        }
+
+        $("#searchButton").click(function() {
+            var searchValue = $("#searchInput").val().trim();
+            loadApartments({ search: searchValue });
+        });
+
+        $(document).ready(function() {
+            loadApartments({ sort_by: 'rating', order: 'desc' });
+        });
+
+        function goToApartmentDetail(apartmentId) {
+            window.location.href = `/apartment/${encodeURIComponent(apartmentId)}`;
+        }
+    </script>
+</body>
+</html>
