@@ -24,5 +24,6 @@ For a detailed walkthrough on setting up and running the project, please refer t
 1. Change directory to the `query` folder:
    ```bash
    cd query
+   python3 backEndMG.py
 
 ![flow diagram](flowmap.png)
