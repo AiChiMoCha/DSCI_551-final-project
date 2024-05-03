@@ -21,9 +21,21 @@ For a detailed walkthrough on setting up and running the project, please refer t
 
 ### Step 2: Launching the Backend
 
-1. Change directory to the `query` folder:
+1. Change directory to the `query` folder and activate the project
    ```bash
    cd query
    python3 backEndMG.py
+
+Here is the text translated into a format suitable for a README file:
+
+---
+### Step 3: Accessing the Application and Database
+
+- **Accessing the Web Page:**
+  Users can access the web page via the EC2 instance's Public IPv4 address at port 5000. Simply enter `http://<Public-IPv4-address>:5000` in your web browser.
+
+- **Accessing the Database:**
+  Managers can access the corresponding databases directly on the EC2 instance. Use the MongoDB Shell (mongosh) by executing `mongosh`, and then connect to the database with the command `use finalProject_db`.
+---
 
 ![flow diagram](flowmap.png)
