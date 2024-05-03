@@ -13,22 +13,22 @@ For a detailed walkthrough on setting up and running the project, please refer t
 
 ### Step 1: Data Preparation & Database Input
 
-1. Navigate to the `apartment_data` folder.
-2. Run the following Python scripts in order to process and hash the raw data into MongoDB on your EC2 instance:
+- **Navigate to the `apartment_data` folder**
+- **Run the following Python scripts in order to process and hash the raw data into MongoDB on your EC2 instance:**
    - `toJSON.py` - Converts raw data to JSON format.
    - `add_geocode.py` - Adds geocode information to the data.
    - `toMongoDB.py` - Uploads the processed data to MongoDB.
 
 ### Step 2: Launching the Backend
 
-1. Change directory to the `query` folder and activate the project
+- **Change directory to the `query` folder and activate the project**
    ```bash
    cd query
    python3 backEndMG.py
 
 Here is the text translated into a format suitable for a README file:
 
----
+
 ### Step 3: Accessing the Application and Database
 
 - **Accessing the Web Page:**
