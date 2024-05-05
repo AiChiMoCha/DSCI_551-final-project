@@ -4,7 +4,7 @@ This repository contains all the necessary code and database setup required for 
 
 ## Project Overview
 
-All code and databases are designed to run on an Amazon EC2 instance with MongoDB installed. Code can be transferred to the EC2 instance using the `scp` command.
+All code and databases are designed to run on an Amazon EC2 instance with MongoDB installed. Packages can be transferred to the EC2 instance using the `scp` command.
 
 For a detailed walkthrough on setting up and running the project, please refer to this video tutorial:
 [Project Setup Video](https://youtu.be/L4tLTKVzk_A)
